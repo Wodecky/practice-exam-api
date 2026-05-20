@@ -44,6 +44,9 @@ ScaffoldingReadMe.txt
 *~
 CodeCoverage/
 
+# JetBrains Rider
+.idea/
+
 # MSBuild Binary and Structured Log
 *.binlog
 

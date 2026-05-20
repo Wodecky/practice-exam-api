@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PracticeExam.Api/PracticeExam.Api.csproj" />
+    <Project Path="src/PracticeExam.Application/PracticeExam.Application.csproj" />
+    <Project Path="src/PracticeExam.Domain/PracticeExam.Domain.csproj" />
+    <Project Path="src/PracticeExam.Infrastructure/PracticeExam.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PracticeExam.Api.IntegrationTests/PracticeExam.Api.IntegrationTests.csproj" />
+    <Project Path="tests/PracticeExam.Application.UnitTests/PracticeExam.Application.UnitTests.csproj" />
+    <Project Path="tests/PracticeExam.Domain.UnitTests/PracticeExam.Domain.UnitTests.csproj" />
+    <Project Path="tests/PracticeExam.Infrastructure.UnitTests/PracticeExam.Infrastructure.UnitTests.csproj" />
+  </Folder>
+</Solution>
