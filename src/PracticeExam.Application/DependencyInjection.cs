@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using PracticeExam.Application.Exams;
 
 namespace PracticeExam.Application;
 
@@ -10,6 +11,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddScoped<GetExamsHandler>();
+
         return services;
     }
 }

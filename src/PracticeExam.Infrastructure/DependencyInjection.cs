@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PracticeExam.Application.Common.Interfaces;
+using PracticeExam.Infrastructure.Persistence;
 
 namespace PracticeExam.Infrastructure;
 
@@ -14,6 +17,15 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("PracticeExamDb")
+            ?? throw new InvalidOperationException(
+                "Connection string 'PracticeExamDb' is not configured.");
+
+        services.AddDbContext<PracticeExamDbContext>(options =>
+            options.UseSqlite(connectionString));
+
+        services.AddScoped<IExamRepository, ExamRepository>();
+
         return services;
     }
 }
