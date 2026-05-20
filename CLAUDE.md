@@ -104,3 +104,13 @@ the project that matches the layer under test:
 - `PracticeExam.Api.IntegrationTests` — end-to-end HTTP tests that boot the real
   app via `WebApplicationFactory<Program>` (`Program` is exposed as a partial
   class in `Program.cs` for this purpose).
+
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs `restore` → `build` (Release) → `dotnet test`
+on every PR to `main` and on pushes to `main`. The job is named **Build & Test**.
+
+A repository ruleset on `main` requires PRs and a passing **Build & Test**
+status check before merging (admins can bypass). The required-check context is
+matched by the job's `name:` string — if you rename the CI job, update the
+ruleset's required status check to match, or the gate silently stops enforcing.
