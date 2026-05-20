@@ -110,9 +110,10 @@ the project that matches the layer under test:
 `.github/workflows/ci.yml` runs `restore` → `build` (Release) → `dotnet test`
 on every PR to `main` and on pushes to `main`. The job is named **Build & Test**.
 
-`.github/workflows/codeql.yml` runs CodeQL static analysis for C# on the same
-triggers, plus a weekly schedule. It uses `build-mode: manual` — CodeQL sees the
-project's real .NET 10 build rather than relying on `autobuild`.
+`.github/workflows/codeql.yml` runs CodeQL static analysis for C# on a weekly
+schedule only (cron, Monday 06:00 UTC) — it is not triggered by pushes or PRs.
+It uses `build-mode: manual` — CodeQL sees the project's real .NET 10 build
+rather than relying on `autobuild`.
 
 A repository ruleset on `main` requires PRs and a passing **Build & Test**
 status check before merging (admins can bypass). The required-check context is

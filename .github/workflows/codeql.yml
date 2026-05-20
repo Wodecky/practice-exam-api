@@ -1,10 +1,6 @@
 name: CodeQL
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   schedule:
     # Weekly run so updated CodeQL queries are applied even without new commits.
     - cron: '0 6 * * 1'
