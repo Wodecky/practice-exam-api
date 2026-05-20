@@ -75,6 +75,24 @@ project.
 - A new endpoint → a controller in `Api/Controllers`, delegating to Application
   use cases.
 
+## Database
+
+The API reads from an **externally-owned SQLite database** — `practice_exam.db` in
+the sibling `practice-exam-db/` repo, whose schema is migrated by **sqitch**, not by
+EF Core.
+
+- EF Core is used **read-only**. Do **not** add EF migrations or let EF create or
+  alter the schema — sqitch owns it. `PracticeExamDbContext` maps the existing
+  snake_case tables explicitly in `OnModelCreating`.
+- The connection string is `ConnectionStrings:PracticeExamDb`.
+- Row ids are stored as lowercase 32-char hex (`lower(hex(randomblob(16)))`), not
+  the canonical dashed Guid format. Entity `Guid` keys therefore need a value
+  converter (`v => v.ToString("N")` ↔ `Guid.Parse`) — see `Exam`'s mapping in
+  `PracticeExamDbContext`.
+- `Infrastructure.UnitTests` exercise the mapping against an in-memory SQLite
+  database; `Api.IntegrationTests` run against a seeded throwaway file. Both
+  hand-roll the table DDL — keep it in sync with the sqitch schema.
+
 ## Tests
 
 Each production project has a matching test project under `tests/`. Put a test in
