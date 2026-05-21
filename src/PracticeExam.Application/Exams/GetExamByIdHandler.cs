@@ -26,23 +26,17 @@ public sealed class GetExamByIdHandler(IExamRepository examRepository)
             exam.Id,
             exam.Title,
             exam.Description,
-            exam.CreatedAt,
-            exam.UpdatedAt,
             exam.Questions
                 .OrderBy(question => question.CreatedAt)
                 .Select(question => new QuestionResponse(
                     question.Id,
                     question.Text,
-                    question.CreatedAt,
-                    question.UpdatedAt,
                     question.Answers
                         .OrderBy(answer => answer.CreatedAt)
                         .Select(answer => new AnswerResponse(
                             answer.Id,
                             answer.Text,
-                            answer.IsCorrect,
-                            answer.CreatedAt,
-                            answer.UpdatedAt))
+                            answer.IsCorrect))
                         .ToList()))
                 .ToList());
     }

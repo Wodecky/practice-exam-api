@@ -115,6 +115,9 @@ public sealed class ExamRepositoryTests : IDisposable
 
     private void CreateSchema()
     {
+        // A minimal read-side mirror of the sqitch-managed schema. Triggers, indexes,
+        // the is_correct CHECK constraint, and ON DELETE CASCADE are intentionally
+        // omitted — these read-only tests don't exercise them.
         using var command = _connection.CreateCommand();
         command.CommandText =
             """

@@ -43,6 +43,9 @@ public sealed class ExamsApiFactory : WebApplicationFactory<Program>
 
         using (var create = connection.CreateCommand())
         {
+            // A minimal read-side mirror of the sqitch-managed schema. Triggers, indexes,
+            // the is_correct CHECK constraint, and ON DELETE CASCADE are intentionally
+            // omitted — these read-only tests don't exercise them.
             create.CommandText =
                 """
                 CREATE TABLE exams (
