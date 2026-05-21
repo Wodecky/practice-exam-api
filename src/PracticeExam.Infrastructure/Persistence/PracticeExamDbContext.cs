@@ -29,8 +29,6 @@ public sealed class PracticeExamDbContext(DbContextOptions<PracticeExamDbContext
 
             exam.Property(e => e.Title).HasColumnName("title");
             exam.Property(e => e.Description).HasColumnName("description");
-            exam.Property(e => e.CreatedAt).HasColumnName("created_at");
-            exam.Property(e => e.UpdatedAt).HasColumnName("updated_at");
 
             exam.HasMany(e => e.Questions)
                 .WithOne()
@@ -60,8 +58,6 @@ public sealed class PracticeExamDbContext(DbContextOptions<PracticeExamDbContext
                     value => Guid.Parse(value));
 
             question.Property(q => q.Text).HasColumnName("text");
-            question.Property(q => q.CreatedAt).HasColumnName("created_at");
-            question.Property(q => q.UpdatedAt).HasColumnName("updated_at");
 
             question.HasMany(q => q.Answers)
                 .WithOne()
@@ -91,8 +87,6 @@ public sealed class PracticeExamDbContext(DbContextOptions<PracticeExamDbContext
 
             answer.Property(a => a.Text).HasColumnName("text");
             answer.Property(a => a.IsCorrect).HasColumnName("is_correct");
-            answer.Property(a => a.CreatedAt).HasColumnName("created_at");
-            answer.Property(a => a.UpdatedAt).HasColumnName("updated_at");
         });
     }
 }
