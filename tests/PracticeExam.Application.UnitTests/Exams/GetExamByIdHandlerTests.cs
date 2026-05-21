@@ -20,8 +20,11 @@ public class GetExamByIdHandlerTests
     {
         var examId = Guid.NewGuid();
         var questionId = Guid.NewGuid();
-        var correct = Answer.Create(Guid.NewGuid(), questionId, "4", true);
-        var wrong = Answer.Create(Guid.NewGuid(), questionId, "5", false);
+        // Answers are returned ordered by Id, so give them fixed, ordered ids.
+        var correct = Answer.Create(
+            new Guid("00000000-0000-0000-0000-000000000001"), questionId, "4", true);
+        var wrong = Answer.Create(
+            new Guid("00000000-0000-0000-0000-000000000002"), questionId, "5", false);
         var question = Question.Create(questionId, examId, "2 + 2?", [correct, wrong]);
         var exam = Exam.Create(examId, "Math", "Basics", [question]);
         var handler = new GetExamByIdHandler(new FakeExamRepository(exam));
