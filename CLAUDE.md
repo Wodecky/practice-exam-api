@@ -84,6 +84,9 @@ EF Core.
 - EF Core is used **read-only**. Do **not** add EF migrations or let EF create or
   alter the schema — sqitch owns it. `PracticeExamDbContext` maps the existing
   snake_case tables explicitly in `OnModelCreating`.
+- The EF model is a deliberate **read subset** of the schema, not a 1:1 mirror.
+  `created_at`/`updated_at` exist on every table but are intentionally unmapped —
+  don't add them back when "syncing the model to the schema".
 - The connection string is `ConnectionStrings:PracticeExamDb`.
 - Row ids are stored as lowercase 32-char hex (`lower(hex(randomblob(16)))`), not
   the canonical dashed Guid format. Entity `Guid` keys therefore need a value
@@ -91,7 +94,9 @@ EF Core.
   `PracticeExamDbContext`.
 - `Infrastructure.UnitTests` exercise the mapping against an in-memory SQLite
   database; `Api.IntegrationTests` run against a seeded throwaway file. Both
-  hand-roll the table DDL — keep it in sync with the sqitch schema.
+  hand-roll the table DDL — keep it in sync with the **sqitch schema**, not the
+  EF model: the DDL declares `created_at`/`updated_at` (the real columns are
+  `NOT NULL`) even though no entity maps them.
 
 ## Tests
 
