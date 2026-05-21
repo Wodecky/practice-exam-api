@@ -26,7 +26,5 @@ internal sealed class AnswerConfiguration : IEntityTypeConfiguration<Answer>
 
         answer.Property(a => a.Text).HasColumnName("text");
         answer.Property(a => a.IsCorrect).HasColumnName("is_correct");
-        answer.Property(a => a.CreatedAt).HasColumnName("created_at");
-        answer.Property(a => a.UpdatedAt).HasColumnName("updated_at");
     }
 }

@@ -13,10 +13,6 @@ public sealed class Answer : Entity
 
     public bool IsCorrect { get; private set; }
 
-    public DateTime CreatedAt { get; private set; }
-
-    public DateTime UpdatedAt { get; private set; }
-
     // Parameterless constructor for the persistence layer (EF Core) to materialize instances.
     private Answer()
     {
@@ -29,9 +25,7 @@ public sealed class Answer : Entity
         Guid id,
         Guid questionId,
         string text,
-        bool isCorrect,
-        DateTime createdAt,
-        DateTime updatedAt)
+        bool isCorrect)
     {
         return new Answer
         {
@@ -39,8 +33,6 @@ public sealed class Answer : Entity
             QuestionId = questionId,
             Text = text,
             IsCorrect = isCorrect,
-            CreatedAt = createdAt,
-            UpdatedAt = updatedAt,
         };
     }
 }

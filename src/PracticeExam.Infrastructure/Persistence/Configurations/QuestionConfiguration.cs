@@ -25,8 +25,6 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
                 value => Guid.Parse(value));
 
         question.Property(q => q.Text).HasColumnName("text");
-        question.Property(q => q.CreatedAt).HasColumnName("created_at");
-        question.Property(q => q.UpdatedAt).HasColumnName("updated_at");
 
         question.HasMany(q => q.Answers)
             .WithOne()

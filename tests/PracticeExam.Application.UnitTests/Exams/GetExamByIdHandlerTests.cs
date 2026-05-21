@@ -20,12 +20,10 @@ public class GetExamByIdHandlerTests
     {
         var examId = Guid.NewGuid();
         var questionId = Guid.NewGuid();
-        var createdAt = new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc);
-        var correct = Answer.Create(Guid.NewGuid(), questionId, "4", true, createdAt, createdAt);
-        var wrong = Answer.Create(Guid.NewGuid(), questionId, "5", false, createdAt, createdAt);
-        var question = Question.Create(
-            questionId, examId, "2 + 2?", createdAt, createdAt, [correct, wrong]);
-        var exam = Exam.Create(examId, "Math", "Basics", createdAt, createdAt, [question]);
+        var correct = Answer.Create(Guid.NewGuid(), questionId, "4", true);
+        var wrong = Answer.Create(Guid.NewGuid(), questionId, "5", false);
+        var question = Question.Create(questionId, examId, "2 + 2?", [correct, wrong]);
+        var exam = Exam.Create(examId, "Math", "Basics", [question]);
         var handler = new GetExamByIdHandler(new FakeExamRepository(exam));
 
         var result = await handler.HandleAsync(examId);
@@ -43,21 +41,17 @@ public class GetExamByIdHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_OrdersQuestionsAndAnswersByCreatedAt()
+    public async Task HandleAsync_OrdersQuestionsAndAnswersById()
     {
         var examId = Guid.NewGuid();
-        var baseTime = new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc);
-        var qId = Guid.NewGuid();
-        var laterAnswer = Answer.Create(
-            Guid.NewGuid(), qId, "later", false, baseTime.AddMinutes(2), baseTime);
-        var earlierAnswer = Answer.Create(
-            Guid.NewGuid(), qId, "earlier", true, baseTime.AddMinutes(1), baseTime);
-        var laterQuestion = Question.Create(
-            Guid.NewGuid(), examId, "later", baseTime.AddHours(2), baseTime);
+        var firstId = new Guid("00000000-0000-0000-0000-000000000001");
+        var secondId = new Guid("00000000-0000-0000-0000-000000000002");
+        var laterAnswer = Answer.Create(secondId, firstId, "later", false);
+        var earlierAnswer = Answer.Create(firstId, firstId, "earlier", true);
+        var laterQuestion = Question.Create(secondId, examId, "later");
         var earlierQuestion = Question.Create(
-            qId, examId, "earlier", baseTime.AddHours(1), baseTime, [laterAnswer, earlierAnswer]);
-        var exam = Exam.Create(
-            examId, "Exam", null, baseTime, baseTime, [laterQuestion, earlierQuestion]);
+            firstId, examId, "earlier", [laterAnswer, earlierAnswer]);
+        var exam = Exam.Create(examId, "Exam", null, [laterQuestion, earlierQuestion]);
         var handler = new GetExamByIdHandler(new FakeExamRepository(exam));
 
         var result = await handler.HandleAsync(examId);

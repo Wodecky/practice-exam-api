@@ -21,8 +21,6 @@ internal sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
 
         exam.Property(e => e.Title).HasColumnName("title");
         exam.Property(e => e.Description).HasColumnName("description");
-        exam.Property(e => e.CreatedAt).HasColumnName("created_at");
-        exam.Property(e => e.UpdatedAt).HasColumnName("updated_at");
 
         exam.HasMany(e => e.Questions)
             .WithOne()
