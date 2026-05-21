@@ -12,6 +12,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<GetExamsHandler>();
+        services.AddScoped<GetExamByIdHandler>();
 
         return services;
     }

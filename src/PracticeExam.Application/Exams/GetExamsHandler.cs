@@ -15,9 +15,7 @@ public sealed class GetExamsHandler(IExamRepository examRepository)
             .Select(exam => new ExamResponse(
                 exam.Id,
                 exam.Title,
-                exam.Description,
-                exam.CreatedAt,
-                exam.UpdatedAt))
+                exam.Description))
             .ToList();
     }
 }

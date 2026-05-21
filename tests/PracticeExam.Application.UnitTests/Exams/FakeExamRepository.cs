@@ -12,4 +12,9 @@ internal sealed class FakeExamRepository(params Exam[] exams) : IExamRepository
     {
         return Task.FromResult<IReadOnlyList<Exam>>(exams);
     }
+
+    public Task<Exam?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(exams.FirstOrDefault(exam => exam.Id == id));
+    }
 }

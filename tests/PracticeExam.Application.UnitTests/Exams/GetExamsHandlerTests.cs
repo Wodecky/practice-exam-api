@@ -20,8 +20,6 @@ public class GetExamsHandlerTests
         Assert.Equal(id, response.Id);
         Assert.Equal("History", response.Title);
         Assert.Equal("World War II", response.Description);
-        Assert.Equal(createdAt, response.CreatedAt);
-        Assert.Equal(updatedAt, response.UpdatedAt);
     }
 
     [Fact]

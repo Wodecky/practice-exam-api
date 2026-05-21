@@ -67,8 +67,57 @@ public sealed class ExamRepositoryTests : IDisposable
         Assert.Equal(new DateTime(2026, 1, 1, 10, 0, 0), exam.CreatedAt);
     }
 
+    [Fact]
+    public async Task GetByIdAsync_ReturnsNull_WhenExamDoesNotExist()
+    {
+        var repository = new ExamRepository(_dbContext);
+
+        var exam = await repository.GetByIdAsync(Guid.NewGuid());
+
+        Assert.Null(exam);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_LoadsExamWithItsQuestionsAndAnswers()
+    {
+        const string examId = "a1b2c3d4e5f6470890123456789abcde";
+        const string questionId = "b1b2c3d4e5f6470890123456789abcde";
+        InsertExam("Geography", "2026-01-01 10:00:00", id: examId);
+        InsertQuestion(questionId, examId, "Capital of France?", "2026-01-01 10:00:00");
+        InsertAnswer(questionId, "Paris", isCorrect: true, "2026-01-01 10:00:00");
+        InsertAnswer(questionId, "London", isCorrect: false, "2026-01-01 10:00:01");
+        var repository = new ExamRepository(_dbContext);
+
+        var exam = await repository.GetByIdAsync(Guid.Parse(examId));
+
+        Assert.NotNull(exam);
+        Assert.Equal(Guid.Parse(examId), exam.Id);
+        var question = Assert.Single(exam.Questions);
+        Assert.Equal(Guid.Parse(questionId), question.Id);
+        Assert.Equal("Capital of France?", question.Text);
+        Assert.Equal(2, question.Answers.Count);
+        Assert.Contains(question.Answers, answer => answer is { Text: "Paris", IsCorrect: true });
+        Assert.Contains(question.Answers, answer => answer is { Text: "London", IsCorrect: false });
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsExamWithNoQuestions_WhenItHasNone()
+    {
+        const string examId = "c1b2c3d4e5f6470890123456789abcde";
+        InsertExam("Empty", "2026-01-01 10:00:00", id: examId);
+        var repository = new ExamRepository(_dbContext);
+
+        var exam = await repository.GetByIdAsync(Guid.Parse(examId));
+
+        Assert.NotNull(exam);
+        Assert.Empty(exam.Questions);
+    }
+
     private void CreateSchema()
     {
+        // A minimal read-side mirror of the sqitch-managed schema. Triggers, indexes,
+        // the is_correct CHECK constraint, and ON DELETE CASCADE are intentionally
+        // omitted — these read-only tests don't exercise them.
         using var command = _connection.CreateCommand();
         command.CommandText =
             """
@@ -76,6 +125,21 @@ public sealed class ExamRepositoryTests : IDisposable
                 id          TEXT PRIMARY KEY,
                 title       TEXT NOT NULL,
                 description TEXT,
+                created_at  TEXT NOT NULL,
+                updated_at  TEXT NOT NULL
+            );
+            CREATE TABLE questions (
+                id         TEXT PRIMARY KEY,
+                exam_id    TEXT NOT NULL REFERENCES exams(id),
+                text       TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            CREATE TABLE answers (
+                id          TEXT PRIMARY KEY,
+                question_id TEXT NOT NULL REFERENCES questions(id),
+                text        TEXT NOT NULL,
+                is_correct  INTEGER NOT NULL DEFAULT 0,
                 created_at  TEXT NOT NULL,
                 updated_at  TEXT NOT NULL
             );
@@ -98,6 +162,37 @@ public sealed class ExamRepositoryTests : IDisposable
         command.Parameters.AddWithValue("$id", id ?? Guid.NewGuid().ToString("N"));
         command.Parameters.AddWithValue("$title", title);
         command.Parameters.AddWithValue("$description", (object?)description ?? DBNull.Value);
+        command.Parameters.AddWithValue("$createdAt", createdAt);
+        command.ExecuteNonQuery();
+    }
+
+    private void InsertQuestion(string id, string examId, string text, string createdAt)
+    {
+        using var command = _connection.CreateCommand();
+        command.CommandText =
+            """
+            INSERT INTO questions (id, exam_id, text, created_at, updated_at)
+            VALUES ($id, $examId, $text, $createdAt, $createdAt);
+            """;
+        command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$examId", examId);
+        command.Parameters.AddWithValue("$text", text);
+        command.Parameters.AddWithValue("$createdAt", createdAt);
+        command.ExecuteNonQuery();
+    }
+
+    private void InsertAnswer(string questionId, string text, bool isCorrect, string createdAt)
+    {
+        using var command = _connection.CreateCommand();
+        command.CommandText =
+            """
+            INSERT INTO answers (id, question_id, text, is_correct, created_at, updated_at)
+            VALUES ($id, $questionId, $text, $isCorrect, $createdAt, $createdAt);
+            """;
+        command.Parameters.AddWithValue("$id", Guid.NewGuid().ToString("N"));
+        command.Parameters.AddWithValue("$questionId", questionId);
+        command.Parameters.AddWithValue("$text", text);
+        command.Parameters.AddWithValue("$isCorrect", isCorrect ? 1 : 0);
         command.Parameters.AddWithValue("$createdAt", createdAt);
         command.ExecuteNonQuery();
     }

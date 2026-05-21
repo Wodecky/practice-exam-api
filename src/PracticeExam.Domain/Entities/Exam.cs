@@ -7,6 +7,8 @@ namespace PracticeExam.Domain.Entities;
 /// </summary>
 public sealed class Exam : Entity
 {
+    private readonly List<Question> _questions = [];
+
     public string Title { get; private set; } = string.Empty;
 
     public string? Description { get; private set; }
@@ -14,6 +16,9 @@ public sealed class Exam : Entity
     public DateTime CreatedAt { get; private set; }
 
     public DateTime UpdatedAt { get; private set; }
+
+    /// <summary>The exam's questions.</summary>
+    public IReadOnlyList<Question> Questions => _questions;
 
     // Parameterless constructor for the persistence layer (EF Core) to materialize instances.
     private Exam()
@@ -29,9 +34,10 @@ public sealed class Exam : Entity
         string title,
         string? description,
         DateTime createdAt,
-        DateTime updatedAt)
+        DateTime updatedAt,
+        IEnumerable<Question>? questions = null)
     {
-        return new Exam
+        var exam = new Exam
         {
             Id = id,
             Title = title,
@@ -39,5 +45,12 @@ public sealed class Exam : Entity
             CreatedAt = createdAt,
             UpdatedAt = updatedAt,
         };
+
+        if (questions is not null)
+        {
+            exam._questions.AddRange(questions);
+        }
+
+        return exam;
     }
 }

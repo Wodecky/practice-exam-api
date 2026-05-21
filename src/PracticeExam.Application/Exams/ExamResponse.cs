@@ -6,6 +6,4 @@ namespace PracticeExam.Application.Exams;
 public sealed record ExamResponse(
     Guid Id,
     string Title,
-    string? Description,
-    DateTime CreatedAt,
-    DateTime UpdatedAt);
+    string? Description);
