@@ -13,7 +13,7 @@ public sealed class ExamRepository(PracticeExamDbContext dbContext) : IExamRepos
     {
         return await dbContext.Exams
             .AsNoTracking()
-            .OrderBy(exam => exam.CreatedAt)
+            .OrderBy(exam => exam.Id)
             .ToListAsync(cancellationToken);
     }
 

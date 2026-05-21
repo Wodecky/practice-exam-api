@@ -9,9 +9,7 @@ public class GetExamsHandlerTests
     public async Task HandleAsync_MapsEveryFieldOntoTheResponse()
     {
         var id = Guid.NewGuid();
-        var createdAt = new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc);
-        var updatedAt = new DateTime(2026, 1, 2, 9, 0, 0, DateTimeKind.Utc);
-        var exam = Exam.Create(id, "History", "World War II", createdAt, updatedAt);
+        var exam = Exam.Create(id, "History", "World War II");
         var handler = new GetExamsHandler(new FakeExamRepository(exam));
 
         var result = await handler.HandleAsync();
@@ -35,8 +33,8 @@ public class GetExamsHandlerTests
     [Fact]
     public async Task HandleAsync_PreservesRepositoryOrder()
     {
-        var first = Exam.Create(Guid.NewGuid(), "First", null, DateTime.UtcNow, DateTime.UtcNow);
-        var second = Exam.Create(Guid.NewGuid(), "Second", null, DateTime.UtcNow, DateTime.UtcNow);
+        var first = Exam.Create(Guid.NewGuid(), "First", null);
+        var second = Exam.Create(Guid.NewGuid(), "Second", null);
         var handler = new GetExamsHandler(new FakeExamRepository(first, second));
 
         var result = await handler.HandleAsync();

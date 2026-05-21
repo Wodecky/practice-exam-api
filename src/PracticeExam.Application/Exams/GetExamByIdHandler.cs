@@ -27,12 +27,12 @@ public sealed class GetExamByIdHandler(IExamRepository examRepository)
             exam.Title,
             exam.Description,
             exam.Questions
-                .OrderBy(question => question.CreatedAt)
+                .OrderBy(question => question.Id)
                 .Select(question => new QuestionResponse(
                     question.Id,
                     question.Text,
                     question.Answers
-                        .OrderBy(answer => answer.CreatedAt)
+                        .OrderBy(answer => answer.Id)
                         .Select(answer => new AnswerResponse(
                             answer.Id,
                             answer.Text,

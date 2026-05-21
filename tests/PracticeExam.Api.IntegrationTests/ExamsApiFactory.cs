@@ -99,27 +99,28 @@ public sealed class ExamsApiFactory : WebApplicationFactory<Program>
             insertQuestion.ExecuteNonQuery();
         }
 
-        InsertAnswer(connection, "4", isCorrect: true, "2026-01-01 10:00:00");
-        InsertAnswer(connection, "5", isCorrect: false, "2026-01-01 10:00:01");
+        // Answers are returned ordered by id; seed ascending ids so "4" precedes "5".
+        InsertAnswer(connection, "00000000000000000000000000000001", "4", isCorrect: true);
+        InsertAnswer(connection, "00000000000000000000000000000002", "5", isCorrect: false);
     }
 
     private void InsertAnswer(
         SqliteConnection connection,
+        string id,
         string text,
-        bool isCorrect,
-        string createdAt)
+        bool isCorrect)
     {
         using var insert = connection.CreateCommand();
         insert.CommandText =
             """
             INSERT INTO answers (id, question_id, text, is_correct, created_at, updated_at)
-            VALUES ($id, $questionId, $text, $isCorrect, $createdAt, $createdAt);
+            VALUES ($id, $questionId, $text, $isCorrect,
+                    '2026-01-01 10:00:00', '2026-01-01 10:00:00');
             """;
-        insert.Parameters.AddWithValue("$id", Guid.NewGuid().ToString("N"));
+        insert.Parameters.AddWithValue("$id", id);
         insert.Parameters.AddWithValue("$questionId", SeededQuestionId.ToString("N"));
         insert.Parameters.AddWithValue("$text", text);
         insert.Parameters.AddWithValue("$isCorrect", isCorrect ? 1 : 0);
-        insert.Parameters.AddWithValue("$createdAt", createdAt);
         insert.ExecuteNonQuery();
     }
 

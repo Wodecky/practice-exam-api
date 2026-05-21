@@ -10,6 +10,10 @@ namespace PracticeExam.Infrastructure.UnitTests.Persistence;
 /// </summary>
 public sealed class ExamRepositoryTests : IDisposable
 {
+    // The sqitch schema marks created_at/updated_at NOT NULL; the API no longer
+    // maps them, so inserts just supply a constant to satisfy the constraint.
+    private const string Timestamp = "2026-01-01 10:00:00";
+
     private readonly SqliteConnection _connection;
     private readonly PracticeExamDbContext _dbContext;
 
@@ -38,25 +42,25 @@ public sealed class ExamRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetAllAsync_ReturnsExamsOrderedByCreatedAt()
+    public async Task GetAllAsync_ReturnsExamsOrderedById()
     {
-        InsertExam("Newer", "2026-02-01 10:00:00");
-        InsertExam("Older", "2026-01-01 10:00:00");
+        InsertExam("Second", id: "22222222222222222222222222222222");
+        InsertExam("First", id: "11111111111111111111111111111111");
         var repository = new ExamRepository(_dbContext);
 
         var exams = await repository.GetAllAsync();
 
         Assert.Collection(
             exams,
-            exam => Assert.Equal("Older", exam.Title),
-            exam => Assert.Equal("Newer", exam.Title));
+            exam => Assert.Equal("First", exam.Title),
+            exam => Assert.Equal("Second", exam.Title));
     }
 
     [Fact]
     public async Task GetAllAsync_MapsHexIdToGuidAndPreservesFields()
     {
         const string hexId = "a1b2c3d4e5f6470890123456789abcde";
-        InsertExam("Biology", "2026-01-01 10:00:00", id: hexId, description: null);
+        InsertExam("Biology", id: hexId, description: null);
         var repository = new ExamRepository(_dbContext);
 
         var exam = Assert.Single(await repository.GetAllAsync());
@@ -64,7 +68,6 @@ public sealed class ExamRepositoryTests : IDisposable
         Assert.Equal(Guid.Parse(hexId), exam.Id);
         Assert.Equal("Biology", exam.Title);
         Assert.Null(exam.Description);
-        Assert.Equal(new DateTime(2026, 1, 1, 10, 0, 0), exam.CreatedAt);
     }
 
     [Fact]
@@ -82,10 +85,10 @@ public sealed class ExamRepositoryTests : IDisposable
     {
         const string examId = "a1b2c3d4e5f6470890123456789abcde";
         const string questionId = "b1b2c3d4e5f6470890123456789abcde";
-        InsertExam("Geography", "2026-01-01 10:00:00", id: examId);
-        InsertQuestion(questionId, examId, "Capital of France?", "2026-01-01 10:00:00");
-        InsertAnswer(questionId, "Paris", isCorrect: true, "2026-01-01 10:00:00");
-        InsertAnswer(questionId, "London", isCorrect: false, "2026-01-01 10:00:01");
+        InsertExam("Geography", id: examId);
+        InsertQuestion(questionId, examId, "Capital of France?");
+        InsertAnswer(questionId, "Paris", isCorrect: true);
+        InsertAnswer(questionId, "London", isCorrect: false);
         var repository = new ExamRepository(_dbContext);
 
         var exam = await repository.GetByIdAsync(Guid.Parse(examId));
@@ -104,7 +107,7 @@ public sealed class ExamRepositoryTests : IDisposable
     public async Task GetByIdAsync_ReturnsExamWithNoQuestions_WhenItHasNone()
     {
         const string examId = "c1b2c3d4e5f6470890123456789abcde";
-        InsertExam("Empty", "2026-01-01 10:00:00", id: examId);
+        InsertExam("Empty", id: examId);
         var repository = new ExamRepository(_dbContext);
 
         var exam = await repository.GetByIdAsync(Guid.Parse(examId));
@@ -149,7 +152,6 @@ public sealed class ExamRepositoryTests : IDisposable
 
     private void InsertExam(
         string title,
-        string createdAt,
         string? id = null,
         string? description = "sample description")
     {
@@ -157,43 +159,43 @@ public sealed class ExamRepositoryTests : IDisposable
         command.CommandText =
             """
             INSERT INTO exams (id, title, description, created_at, updated_at)
-            VALUES ($id, $title, $description, $createdAt, $createdAt);
+            VALUES ($id, $title, $description, $timestamp, $timestamp);
             """;
         command.Parameters.AddWithValue("$id", id ?? Guid.NewGuid().ToString("N"));
         command.Parameters.AddWithValue("$title", title);
         command.Parameters.AddWithValue("$description", (object?)description ?? DBNull.Value);
-        command.Parameters.AddWithValue("$createdAt", createdAt);
+        command.Parameters.AddWithValue("$timestamp", Timestamp);
         command.ExecuteNonQuery();
     }
 
-    private void InsertQuestion(string id, string examId, string text, string createdAt)
+    private void InsertQuestion(string id, string examId, string text)
     {
         using var command = _connection.CreateCommand();
         command.CommandText =
             """
             INSERT INTO questions (id, exam_id, text, created_at, updated_at)
-            VALUES ($id, $examId, $text, $createdAt, $createdAt);
+            VALUES ($id, $examId, $text, $timestamp, $timestamp);
             """;
         command.Parameters.AddWithValue("$id", id);
         command.Parameters.AddWithValue("$examId", examId);
         command.Parameters.AddWithValue("$text", text);
-        command.Parameters.AddWithValue("$createdAt", createdAt);
+        command.Parameters.AddWithValue("$timestamp", Timestamp);
         command.ExecuteNonQuery();
     }
 
-    private void InsertAnswer(string questionId, string text, bool isCorrect, string createdAt)
+    private void InsertAnswer(string questionId, string text, bool isCorrect)
     {
         using var command = _connection.CreateCommand();
         command.CommandText =
             """
             INSERT INTO answers (id, question_id, text, is_correct, created_at, updated_at)
-            VALUES ($id, $questionId, $text, $isCorrect, $createdAt, $createdAt);
+            VALUES ($id, $questionId, $text, $isCorrect, $timestamp, $timestamp);
             """;
         command.Parameters.AddWithValue("$id", Guid.NewGuid().ToString("N"));
         command.Parameters.AddWithValue("$questionId", questionId);
         command.Parameters.AddWithValue("$text", text);
         command.Parameters.AddWithValue("$isCorrect", isCorrect ? 1 : 0);
-        command.Parameters.AddWithValue("$createdAt", createdAt);
+        command.Parameters.AddWithValue("$timestamp", Timestamp);
         command.ExecuteNonQuery();
     }
 
